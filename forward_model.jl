@@ -84,6 +84,14 @@ function constraints(x::Array)
     return [a1*b1-a2*b2]
 end
 
+## Utility
+function generate_data(x::Array)
+    x_t = reverse_input(x)
+    stim_sequence = load_stimulus()
+    input = forward_model(stim_sequence, x_t, isComplex=false)
+    return input
+end
+
 ## Run model
 function test()
     θ = [4, 6, 1+0.1im, 6, 12, 0.9, 0.9, 0.35]

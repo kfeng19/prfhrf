@@ -3,9 +3,8 @@ include(joinpath(@__DIR__,"forward_model.jl"))
 
 ## Generate data
 x_gt = [1,3,2.5, 6, 10, 0.8, 0.9, 0.4]
+# input = generate_data(x_gt)
 x_t = reverse_input(x_gt)
-x_back = transform_input(x_t)
-# println(x_t)
 stim_sequence = load_stimulus()
 input = forward_model(stim_sequence, x_t, isComplex=false)
 

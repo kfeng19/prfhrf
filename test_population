@@ -1,0 +1,10 @@
+include(joinpath(@__DIR__,"population_optimizer.jl"))
+include(joinpath(@__DIR__,"forward_model.jl"))
+
+## Initial
+x = [0, 0, 3, 8, 9, 0.7, 0.8, 0.5]
+μ = reverse_input(x)
+σx = [1, 1, 1, 1, 1, 0.1, 0.1, 0.1]
+σt = reverse_input(σx + x) - μ
+population = rand_population_cauchy(50, μ, σt)
+temp = transform_input.(population)
