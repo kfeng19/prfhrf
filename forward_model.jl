@@ -23,8 +23,10 @@ function transform_input(θ_t)
     x0 = 20 * atan(x0_t) / pi
     y0 = 20 * atan(y0_t) / pi
     σ = 10 * atan(σ_t) / pi + 5.
-    a1 = a1_t ^ 2
-    a2 = a2_t ^ 2
+    # a1 = a1_t ^ 2
+    a1 = 10 * atan(a1_t) / pi + 5
+    # a2 = a2_t ^ 2
+    a2 = 10 * atan(a2_t) / pi + 5
     b1 = atan(b1_t) / pi + 0.5
     b2 = atan(b2_t) / pi + 0.5
     c = atan(c_t) / pi + 0.5
@@ -36,8 +38,10 @@ function reverse_input(θ)
     x0_t = tan(pi*x0/20)
     y0_t = tan(pi*y0/20)
     σ_t = tan(pi*(σ-5)/10)
-    a1_t = sqrt(a1)
-    a2_t = sqrt(a2)
+    # a1_t = sqrt(a1)
+    a1_t = tan(π*(a1-5)/10)
+    # a2_t = sqrt(a2)
+    a2_t = tan(π*(a2-5)/10)
     b1_t = tan(pi*(b1-0.5))
     b2_t = tan(pi*(b2-0.5))
     c_t = tan(pi*(c-0.5))
@@ -45,7 +49,7 @@ function reverse_input(θ)
 end
 
 function forward_2D(stim_sequence, x)
-    θ_t = [0.158, 0.51, -1., x[1], x[2], 0.894, 0.949, -0.325]
+    θ_t = [0.158, 0.51, -1., x[1], x[2], 1.38, 3.08, -0.325]
     return forward_model(stim_sequence, θ_t)
 end
 
@@ -79,8 +83,9 @@ function constraints_2D(x::Array)
     return return(x[1]^2*0.8-x[2]^2*0.9)
 end
 
-function constraints(x::Array)
-    a1, a2, b1, b2 = x[4]^2, x[5]^2, x[6]^2, x[7]^2
+function constraints(x_t::Array)
+    x = transform_input(x_t)
+    a1, a2, b1, b2 = x[4], x[5], x[6], x[7]
     return [a1*b1-a2*b2]
 end
 
