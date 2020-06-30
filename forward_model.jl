@@ -53,10 +53,9 @@ function forward_2D(stim_sequence, x)
     return forward_model(stim_sequence, θ_t)
 end
 
-function forward_model(stim_sequence, θ_t; isComplex=true)
-    x0, y0, σ, a1, a2, b1, b2, c = transform_input(θ_t)
+function forward_model(stim_sequence, θ_t; isComplex=true, in_type="unbounded")
+    x0, y0, σ, a1, a2, b1, b2, c = in_type == "bounded" ? θ_t : transform_input(θ_t)
     # a1,a2,b1,b2,c>0, a2b2>a1b1 c<1
-    # σ, a1, a2, b1, b2,c = [2.5, 6, 10, 0.8, 0.9, 0.4]
     pRF = get_gaussian(σ,x0,y0)
     N = size(stim_sequence,3)
     time_series = isComplex ? ComplexF64[] : Float64[]  # To accomodate complex differentiation
@@ -64,7 +63,6 @@ function forward_model(stim_sequence, θ_t; isComplex=true)
         # Order of dot is important since first element is conjugated
         push!(time_series,stim_sequence[:,:,k]⋅pRF)
     end
-    # println(typeof(time_series))
     t = 0:20
     hrf = hrf_fun(a1, a2, b1, b2, c, t)
     # println(typeof(hrf))
@@ -75,7 +73,13 @@ end
 function hrf_fun(a1, a2, b1, b2, c, t)
     d1, d2 = a1*b1, a2*b2
     # hrf(t=1) < 0.1, |hrf(t=30)|<0.01
-    hrf = (t/d1).^a1.* exp.(-(t .- d1)/b1)- c*(t/d2).^a2 .* exp.(-(t.-d2)/b2);
+    # println("a1:", a1)
+    # println("a2:", a2)
+    # println("b1:", b1)
+    # println("b2:", b2)
+    # println("c:", c)
+    # println("t:", t)
+    hrf = (t/d1).^a1.* exp.(-(t .- d1)/b1)- c*  (t/d2).^a2 .* exp.(-(t.-d2)/b2);
     return hrf
 end
 
@@ -87,6 +91,17 @@ function constraints(x_t::Array)
     x = transform_input(x_t)
     a1, a2, b1, b2 = x[4], x[5], x[6], x[7]
     return [a1*b1-a2*b2]
+end
+
+function soft_regularizer(x_t::Array)
+    x = transform_input(x_t)
+    out = 0
+    # println(x)
+    out += x[6] > x[8] ? 0 : (x[8] - x[6])^2
+    peak1 = x[4] * x[6]
+    out += peak1 > 3 ? 0 : (3-peak1)^2
+    out += peak1 < 6 ? 0 : (6-peak1)^2
+    return out
 end
 
 ## Utility

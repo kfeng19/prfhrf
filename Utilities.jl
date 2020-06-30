@@ -1,11 +1,10 @@
-function loss(test, ref, x; λ=0)
+function loss(test, ref, x; λ=0, regularizer::Function)
     # @param x: direct input
     diff = test-ref
     # return log(sum(diff.^2))
-    return sum(diff.^2) + λ*sum(x.^2)
+    # println(x)
+    return sum(diff.^2) + λ*regularizer(real.(x))
 end
-
-
 
 function quadratic_penalty(c::Function ,x)
     c_vals = c(x)
